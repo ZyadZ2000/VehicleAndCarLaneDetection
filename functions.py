@@ -11,7 +11,7 @@ def read_img(img):
 def show_image(image, title='Image', cmap_type='gray', bgr2rgb=False):
     if bgr2rgb:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    plt.imshow(image, cmap=cmap_type)
+    plt.show(image, cmap=cmap_type)
     plt.title(title)
     plt.show()
 
@@ -41,32 +41,19 @@ def show_images(images, cols=2, cmap=None, bgr2rgb=False):
 
 def warper(img):
 
-    # Compute and apply perpective transform
     img_size = (img.shape[1], img.shape[0])
     M = cv2.getPerspectiveTransform(src, dst)
-    # keep same size as input image
-    warped = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_NEAREST)
-
+    warped = cv2.warpPrespective(img, M, img_size, flags=cv2.INTER_NEAREST)
     return warped
 
-
-def unwarp(img):
-
-    # Compute and apply inverse perpective transform
+def unwarped(img):
     img_size = (img.shape[1], img.shape[0])
     Minv = cv2.getPerspectiveTransform(dst, src)
-    unwarped = cv2.warpPerspective(
-        img, Minv, img_size, flags=cv2.INTER_NEAREST)
-
-    return unwarped
+    unwarped = cv2.warpPerspective(img, Minv, img_size, flags=cv2.INTER_NEAREST)
 
 
-def calc_sobel(img, sx=False, sy=False, sobel_kernel=5, thresh=(25, 200)):
-
-    # Convert to grayscale - sobel can only have one color channel
+def calc_sobel(img, sx=False, sy=False, sobel_kernel=5, thresh=(25,200)):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-
-    # Take the sobel gradient in x and y
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1)
 
@@ -77,22 +64,16 @@ def calc_sobel(img, sx=False, sy=False, sobel_kernel=5, thresh=(25, 200)):
         abs_sobel = np.absolute(sobely)
         scaled_sobel = np.uint8(255*abs_sobel/np.max(abs_sobel))
     else:
-        # Calculate the magnitude
         mag_sobel = np.sqrt(np.square(sobelx) + np.square(sobely))
-
-        # Scale to 8-bit (0 - 255) and convert to type = np.uint8
         scaled_sobel = np.uint8(255*mag_sobel/np.max(mag_sobel))
 
-    # Create a binary mask where mag thresholds are me
     sxbinary = np.zeros_like(scaled_sobel)
     sxbinary[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])] = 1
 
     return sxbinary
 
-
 def canny(img, low_threshold, high_threshold):
     return cv2.Canny(img, low_threshold, high_threshold)
-
 
 def gaussian_blur(img, kernel_size=5):
     return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
@@ -101,10 +82,7 @@ def gaussian_blur(img, kernel_size=5):
 def run_canny(img, kernel_size=5, low_thresh=50, high_thresh=150):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Apply a Gaussian Blur
     gausImage = gaussian_blur(gray, kernel_size)
-
-    # Run the canny edge detection
     cannyImage = canny(gausImage, low_thresh, high_thresh)
 
     return cannyImage
